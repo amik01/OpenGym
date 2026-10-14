@@ -13,7 +13,11 @@ zapis wyboru do prywatnego pliku Androida, lokalne zasoby ćwiczeń, przejście
 do biblioteki i odtworzenie aktywności bez ponownego onboardingu. Zapisuje
 APK i SHA-256 jako artefakt `OpenGym-Android-test`, a zrzut ekranu oraz raporty
 oddzielnie jako `OpenGym-Android-reports` na 7 dni. APK budowana jest przed
-startem emulatora; jego partycja danych ma 2 GiB, aby zmieścić się na runnerze.
+startem emulatora. Konfiguracja ogranicza partycję danych do 2 GiB, lecz obraz
+Google może wymagać większego pliku startowego; na jednorazowym runnerze
+zwalniane są nieużywane SDK .NET/Haskell. Nie usuwa to niczego z komputera
+właściciela. Przed testem wyłączane są Wi-Fi i dane komórkowe emulatora;
+obraz ćwiczenia musi być rzeczywiście zdekodowany przez WebView.
 Nie zastępuje to odbioru użytkowego wszystkich funkcji.
 
 Debug ma osobny identyfikator `ch.duartesantos.opengym.test` i nazwę

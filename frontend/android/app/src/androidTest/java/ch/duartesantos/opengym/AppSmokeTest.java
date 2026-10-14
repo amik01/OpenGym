@@ -56,9 +56,10 @@ public class AppSmokeTest {
             JSONObject saved = new JSONObject(new String(Files.readAllBytes(connection.toPath()), StandardCharsets.UTF_8));
             assertEquals("local", saved.getString("mode"));
 
-            evaluate(activity, "window.__smokeMedia = null; fetch('/exercise-media/still/0001.webp')"
-                    + ".then(r => r.blob().then(b => { window.__smokeMedia = r.ok && b.size > 0; }))"
-                    + ".catch(() => { window.__smokeMedia = false; });");
+            evaluate(activity, "window.__smokeMedia = null; { const image = new Image();"
+                    + " image.onload = () => { window.__smokeMedia = image.naturalWidth > 0; };"
+                    + " image.onerror = () => { window.__smokeMedia = false; };"
+                    + " image.src = '/exercise-media/still/0001.webp'; }");
             awaitTrue(activity, "window.__smokeMedia === true");
 
             evaluate(activity, "document.querySelectorAll('#tabbar button')[4].click()");
