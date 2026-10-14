@@ -1,0 +1,103 @@
+name: Android APK and emulator
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'frontend/android/**'
+      - '.github/workflows/android-test.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Free space on this disposable Android-only hosted runner
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc
+          df -h /
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Verify the Gradle wrapper before executing it
+        run: |
+          echo '2db75c40782f5e8ba1fc278a5574bab070adccb2d21ca5a6e5ed840888448046  frontend/android/gradle/wrapper/gradle-wrapper.jar' | sha256sum --check
+      - name: Build only the Android mobile bundle
+        working-directory: frontend
+        run: |
+          npm ci --ignore-scripts
+          VITE_MOBILE=1 npm run build
+          node ../scripts/catalogue/stage-media.mjs dist
+          node_modules/.bin/cap sync android
+          node scripts/check-mobile-bundle.mjs
+      - name: Install the compile SDK and build APK independently of emulator boot
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-35' 'build-tools;35.0.0'
+          cd frontend/android
+          ./gradlew :app:testDebugUnitTest :app:assembleDebug --no-daemon
+          mkdir -p smoke-artifacts
+          sha256sum app/build/outputs/apk/debug/app-debug.apk > smoke-artifacts/app-debug.apk.sha256
+      - name: Allow the isolated runner to use hardware acceleration
+        run: sudo chmod a+rw /dev/kvm
+      - name: Native unit tests, debug APK and emulator smoke test
+        # v2.35.0, reviewed source; immutable pin instead of a moving tag.
+        uses: reactivecircus/android-emulator-runner@69c8581131285561115a2e413eb0037446bdc2d6
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disk-size: 2048M
+          ram-size: 2048M
+          emulator-boot-timeout: 300
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-metrics
+          working-directory: frontend/android
+          disable-animations: true
+          script: |
+            adb shell settings put system screen_off_timeout 1800000
+            adb shell input keyevent 224
+            adb shell wm dismiss-keyguard
+            adb shell svc wifi disable
+            adb shell svc data disable
+            ./gradlew :app:connectedDebugAndroidTest --no-daemon
+            mkdir -p smoke-artifacts
+            adb pull /sdcard/Pictures/OpenGymSmoke/. smoke-artifacts/
+      - name: Save test APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenGym-Android-test
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            frontend/android/app/build/outputs/apk/debug/app-debug.apk
+            frontend/android/smoke-artifacts/app-debug.apk.sha256
+      - name: Save screenshot and test reports separately
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenGym-Android-reports
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            frontend/android/smoke-artifacts/*.png
+            frontend/android/app/build/reports/tests/
+            frontend/android/app/build/reports/androidTests/
