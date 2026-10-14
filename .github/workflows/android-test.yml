@@ -75,7 +75,7 @@ jobs:
             adb shell svc data disable
             ./gradlew :app:connectedDebugAndroidTest --no-daemon
             mkdir -p smoke-artifacts
-            adb pull /sdcard/Android/data/ch.duartesantos.opengym.test/files/screenshots/. smoke-artifacts/
+            adb pull /sdcard/Pictures/OpenGymSmoke/. smoke-artifacts/
       - name: Save test APK
         if: always()
         uses: actions/upload-artifact@v4

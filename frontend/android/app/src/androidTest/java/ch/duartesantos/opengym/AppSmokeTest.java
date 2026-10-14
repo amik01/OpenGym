@@ -3,12 +3,15 @@ package ch.duartesantos.opengym;
 import static org.junit.Assert.*;
 
 import android.content.Context;
+import android.content.ContentValues;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -72,10 +75,16 @@ public class AppSmokeTest {
 
             Bitmap screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
             assertNotNull("Android screenshot unavailable", screenshot);
-            File folder = context.getExternalFilesDir("screenshots");
-            assertNotNull(folder);
-            assertTrue(folder.isDirectory() || folder.mkdirs());
-            try (FileOutputStream output = new FileOutputStream(new File(folder, "android-local.png"))) {
+            // Shared test pictures survive Gradle uninstalling the fixture app.
+            // API 35 lets an app insert its own picture without broad storage permission.
+            ContentValues image = new ContentValues();
+            image.put(MediaStore.Images.Media.DISPLAY_NAME, "android-local.png");
+            image.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+            image.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/OpenGymSmoke");
+            Uri destination = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, image);
+            assertNotNull(destination);
+            try (OutputStream output = context.getContentResolver().openOutputStream(destination)) {
+                assertNotNull(output);
                 assertTrue(screenshot.compress(Bitmap.CompressFormat.PNG, 100, output));
             } finally {
                 screenshot.recycle();
