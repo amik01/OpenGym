@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.ContentValues;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.PowerManager;
 import android.provider.MediaStore;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -73,6 +74,8 @@ public class AppSmokeTest {
             awaitTrue(activity, "!!document.querySelector('#tabbar')"
                     + " && !document.body.innerText.includes('How do you want to use openGym?')");
 
+            assertTrue("Emulator display must be awake for a useful screenshot",
+                    context.getSystemService(PowerManager.class).isInteractive());
             Bitmap screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
             assertNotNull("Android screenshot unavailable", screenshot);
             // Shared test pictures survive Gradle uninstalling the fixture app.

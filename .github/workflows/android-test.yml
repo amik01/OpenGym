@@ -71,6 +71,9 @@ jobs:
           working-directory: frontend/android
           disable-animations: true
           script: |
+            adb shell settings put system screen_off_timeout 1800000
+            adb shell input keyevent 224
+            adb shell wm dismiss-keyguard
             adb shell svc wifi disable
             adb shell svc data disable
             ./gradlew :app:connectedDebugAndroidTest --no-daemon
