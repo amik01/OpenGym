@@ -180,3 +180,32 @@ jobs:
           # canDropPrivileges() fails closed, so a missing `coach` user disables every job —
           # including the fixture provider. Cheaper to assert here than to discover on an instance.
           docker run --rm opengym-api:default id coach
+
+  local-stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build both local images from their production Dockerfiles
+        run: docker compose -f compose.local.yml build
+      - name: Start and verify web, API and static assets
+        run: |
+          docker compose -f compose.local.yml up -d --no-build --wait --wait-timeout 90
+          curl -fsS http://127.0.0.1:8090/ > /tmp/opengym-index.html
+          curl -fsS http://127.0.0.1:8090/api/health | grep -q '"ok":true'
+          curl -fsS http://127.0.0.1:8091/api/health | grep -q '"ok":true'
+          curl -fsS http://127.0.0.1:8090/api/config | grep -q '"default_lang":"pl"'
+          node --input-type=module - <<'JS'
+          import { readFileSync } from 'node:fs';
+          const html = readFileSync('/tmp/opengym-index.html', 'utf8');
+          const assets = [...html.matchAll(/(?:src|href)="(\.\/assets\/[^"]+)"/g)];
+          if (!assets.length || html.includes('opengym-flavor')) throw new Error('not a web bundle');
+          for (const [, asset] of assets) {
+            const response = await fetch(new URL(asset, 'http://127.0.0.1:8090/'));
+            if (!response.ok) throw new Error(`asset returned ${response.status}`);
+            await response.arrayBuffer();
+          }
+          JS
+      - name: Stop test containers
+        if: always()
+        run: docker compose -f compose.local.yml down --volumes

@@ -8,6 +8,9 @@ data/
 
 # Local config
 .env
+.env.*
+!.env.example
+coach-auth/
 
 # Build output / deps
 frontend/dist/

@@ -23,6 +23,8 @@ permissions:
 
 jobs:
   build:
+    # A downstream copy starts with local builds; publishing is an explicit opt-in.
+    if: github.repository == 'DuarteSantos8/openGym' || vars.OPENGYM_PUBLISH_IMAGES == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:

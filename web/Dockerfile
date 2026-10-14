@@ -69,7 +69,7 @@ LABEL maintainer="Duarte Santos https://gitlab.com/DuarteSantos8" \
     org.opencontainers.image.revision=$VCS_REF \
     org.opencontainers.image.created=$BUILD_DATE
 
-COPY web/nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY --chmod=644 web/nginx.conf.template /etc/nginx/templates/default.conf.template
 # Stops the container at start-up on a BASE_PATH the config cannot serve ("/gym/", "gym"), instead
 # of a server that 404s under the prefix. nginx's entrypoint runs these scripts in order; 05 is
 # before the template rendering at 20.
@@ -78,6 +78,14 @@ COPY --from=build /app/frontend/dist /usr/share/nginx/html
 # The exercise stills and animations, 180 px, licensed from Gym visual for openGym only: see
 # catalogue/media/NOTICE.md. They ship inside the image; nothing is downloaded at start-up.
 COPY catalogue/media/ /usr/share/nginx/html/exercise-media/
+
+# COPY preserves checkout permissions. A restrictive host umask (077) must not
+# leave templates/assets unreadable to the unprivileged nginx worker.
+USER root
+RUN chmod 755 /etc/nginx/templates \
+ && find /usr/share/nginx/html -type d -exec chmod 755 {} + \
+ && find /usr/share/nginx/html -type f -exec chmod 644 {} +
+USER 101
 
 # Set Default ENVs for nginx
 ENV NGINX_PORT=80
@@ -109,5 +117,5 @@ ENV MEDIA_UPLOAD_MAX=48m
 HEALTHCHECK --interval=5m \
             --timeout=5s \
             --retries=3 \
-            CMD wget --spider -q "http://127.0.0.1:${NGINX_PORT}/" || exit 1
+            CMD wget -Y off --spider -q "http://127.0.0.1:${NGINX_PORT}/" || exit 1
 

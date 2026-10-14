@@ -659,7 +659,7 @@ function csrfOk(req, key) {
   if (CSRF_EXEMPT.has(key)) return true;
   // The paired mobile app authenticates with a Bearer token. A browser never attaches one on its
   // own, so there is no ambient authority for a hostile page to borrow and no origin to check.
-  if ((req.headers.authorization || '').startsWith('Bearer ')) return true;
+  if (sessionOf(req)?.bearer) return true;
   // Sec-Fetch-Site is set by the browser itself and no page can forge it, and it states exactly
   // the property wanted here — more precisely than comparing origins can. 'same-origin' is the
   // app talking to its own backend; a hostile page reports 'cross-site'; a sibling subdomain,
