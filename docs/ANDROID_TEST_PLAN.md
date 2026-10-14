@@ -11,7 +11,9 @@ naszego repozytorium, wykonuje natywne testy jednostkowe i uruchamia Androida
 Weryfikuje start prawdziwego WebView/Capacitor, wybór trybu lokalnego przez UI,
 zapis wyboru do prywatnego pliku Androida, lokalne zasoby ćwiczeń, przejście
 do biblioteki i odtworzenie aktywności bez ponownego onboardingu. Zapisuje
-zrzut ekranu, raporty i APK jako artefakt `OpenGym-Android-test` na 7 dni.
+APK i SHA-256 jako artefakt `OpenGym-Android-test`, a zrzut ekranu oraz raporty
+oddzielnie jako `OpenGym-Android-reports` na 7 dni. APK budowana jest przed
+startem emulatora; jego partycja danych ma 2 GiB, aby zmieścić się na runnerze.
 Nie zastępuje to odbioru użytkowego wszystkich funkcji.
 
 Debug ma osobny identyfikator `ch.duartesantos.opengym.test` i nazwę

@@ -62,7 +62,9 @@ public class AppSmokeTest {
             awaitTrue(activity, "window.__smokeMedia === true");
 
             evaluate(activity, "document.querySelectorAll('#tabbar button')[4].click()");
-            awaitTrue(activity, "location.hash.includes('/library') && document.body.innerText.includes('Exercises')");
+            awaitTrue(activity, "location.hash.includes('/library')"
+                    + " && document.querySelector('#app .lib-hdr h1')?.textContent === 'Exercises'"
+                    + " && document.querySelectorAll('#app .list .item:not(.ex-new)').length > 0");
             activity.recreate();
             awaitTrue(activity, "!!document.querySelector('#tabbar')"
                     + " && !document.body.innerText.includes('How do you want to use openGym?')");
