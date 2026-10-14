@@ -92,8 +92,11 @@ hosta. Działanie sprawdzono w oddzielnych obrazach testowych: API z lokalnie
 zainstalowanymi paczkami, web z lokalnie zbudowanym dist, na bazach Node/nginx.
 Nie są to obrazy wydania i nie wykonano w nich etapu apk upgrade. Nie stanowi
 to potwierdzenia pełnego builda dostarczonych Dockerfile ani aktualności ich
-pakietów systemowych. Należy uruchomić pełny build na WSL według poniższej
-instrukcji albo dopuścić host w konfiguracji środowiska i powtórzyć build tutaj.
+pakietów systemowych. Pełny build obu produkcyjnych Dockerfile i odbiór Compose
+na portach 8090/8091 są dodatkowo objęte jobem `local-stack` w GitHub Actions;
+jego wynik należy sprawdzić w PR. Można również uruchomić pełny build na WSL
+według poniższej instrukcji albo dopuścić host w konfiguracji środowiska
+i powtórzyć build tutaj.
 
 ## Własne repozytorium i WSL
 
