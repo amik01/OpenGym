@@ -75,6 +75,7 @@ Ruch sieciowy i funkcje wymagające świadomego włączenia:
   i odpowiadające im oczekiwania, zachowując sprawdzanie całej struktury odpowiedzi.
   Pięć plików dotyczących tych błędów po zmianie: 85/85. Produkcyjne filtry
   ani reguła 12 tygodni nie zostały osłabione.
+  Ponowiony pełny zestaw API po wszystkich poprawkach: **597/597**, 0 błędów.
 - Pełny frontend: 5054/5060, sześć błędów uruchamiania subprocess w jednym
   pliku testów tłumaczeń w ograniczonym sandboxie. Ponowne uruchomienie całego
   tego pliku z dostępem sieciowym środowiska: 7/7. Nie powtarzano pozostałych
@@ -183,3 +184,5 @@ w aplikacji iOS. Rozwiązanie dostępu sieciowego zależy od Twojej sieci/domeny
 Natywnej kompilacji, podpisania ani uruchomienia w Xcode nie wykonano w
 środowisku Linux. Zweryfikowano build frontendowy oraz skopiowany pakiet iOS;
 pozostają instalacja Pods, kompilacja Swift i odbiór na urządzeniu/symulatorze.
+Właściciel potwierdził brak Maca; obecny zakres obejmuje przygotowanie projektu
+i instrukcji, bez deklarowania wykonanej kompilacji natywnej.
