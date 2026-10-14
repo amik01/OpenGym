@@ -3,5 +3,9 @@ frontend/dist
 media
 data
 .env
+**/.env
+**/.env.*
+!**/.env.example
+coach-auth
 .git
 *.log

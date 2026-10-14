@@ -63,7 +63,7 @@ CMD ["node", "server.js"]
 HEALTHCHECK --interval=5m \
             --timeout=5s \
             --retries=3 \
-            CMD wget --spider -q "http://127.0.0.1:${PORT}/api/health" || exit 1
+            CMD wget -Y off --spider -q "http://127.0.0.1:${PORT}/api/health" || exit 1
 
 # ---------------------------------------------------------------------------------------------
 # The opt-in target. Dropping --omit=optional is the whole difference: it pulls in

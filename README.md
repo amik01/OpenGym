@@ -1,5 +1,8 @@
 <div align="center">
 
+> Kopia rozwijana w `amik01/OpenGym`: [przegląd bezpieczeństwa, porty 8090/8091 i instrukcja iOS](docs/LOCAL_REVIEW.md).
+> Lokalną konfigurację uruchomisz przez `docker compose -f compose.local.yml up -d --build --wait`.
+
 <img src="assets/banner.png" alt="openGym" width="720">
 
 **A self-hosted gym and body-weight tracker you actually own.**

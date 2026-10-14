@@ -1,0 +1,64 @@
+# Independent local deployment: no prebuilt application images or provider credentials.
+name: opengym-local
+services:
+  api:
+    image: opengym-reviewed-api:local
+    build:
+      context: ./api
+      target: default
+    environment:
+      PORT: "3000"
+      DATA_DIR: /data
+      RP_ID: ${RP_ID:-localhost}
+      ORIGIN: ${ORIGIN:-http://localhost:8090}
+      DEFAULT_LANG: pl
+      COACH_DISABLED: "1"
+      # The diagnostic API port bypasses nginx; never trust client-supplied proxy headers.
+      TRUST_PROXY: "0"
+    ports:
+      - "127.0.0.1:8091:3000"
+    volumes:
+      - opengym-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, wget, -Y, "off", --spider, -q, "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      start_period: 20s
+      timeout: 5s
+      retries: 5
+  web:
+    image: opengym-reviewed-web:local
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    environment:
+      NGINX_PORT: "8080"
+      BACKEND: api
+      PORT: "3000"
+      RESOLVER: "127.0.0.11"
+      CF_CONNECTING_IP: ""
+      BASE_PATH: ""
+      MEDIA_UPLOAD_MAX: 48m
+    ports:
+      - "127.0.0.1:8090:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, wget, -Y, "off", --spider, -q, "http://127.0.0.1:8080/"]
+      interval: 10s
+      start_period: 20s
+      timeout: 5s
+      retries: 5
+volumes:
+  opengym-data:
